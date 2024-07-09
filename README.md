@@ -37,7 +37,17 @@ The Moneytree Tracking Bot is a Python-based tool that monitors Ethereum blockch
    pip install -r requirements.txt
    ```
 
-3. **Create a `.env` file:**
+3. (**Get Your Telegram Chat ID:**)
+
+   Use the provided `get_chat_id.py` script to get your Telegram chat ID. Run the following command:
+
+   ```sh
+   python get_chat_id.py
+   ```
+
+   This script will print the chat ID of the group or individual chat where the bot received the most recent message. Use this chat ID in your `.env` file.
+
+4. **Create a `.env` file:**
 
    Copy the example `.env_example` file and rename it to `.env`. Set the environment variables in the `.env` file:
 
@@ -54,16 +64,6 @@ The Moneytree Tracking Bot is a Python-based tool that monitors Ethereum blockch
    ADDRESSES_TO_MONITOR=address1,address2,address3
    ADDRESS_NAMES=name1,name2,name3
    ```
-
-4. (**Get Your Telegram Chat ID:**)
-
-   Use the provided `get_chat_id.py` script to get your Telegram chat ID. Run the following command:
-
-   ```sh
-   python get_chat_id.py
-   ```
-
-   This script will print the chat ID of the group or individual chat where the bot received the most recent message. Use this chat ID in your `.env` file.
 
 5. **Run the bot:**
 

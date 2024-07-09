@@ -140,7 +140,7 @@ def handle_event(tx):
         send_telegram_message(message)
 
     if to_address in ADDRESSES_TO_MONITOR:
-        time.sleep(15)
+        time.sleep(15)  # Wait for 15 seconds
         message = (
             f'⭐ *{to_name}: INCOMING* 💵\n'
             f'*Value:* {value} ETH\n'

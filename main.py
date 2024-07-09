@@ -19,7 +19,7 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 ADDRESSES_TO_MONITOR = os.getenv('ADDRESSES_TO_MONITOR')
 ADDRESS_NAMES = os.getenv('ADDRESS_NAMES')
-SEND_TELEGRAM_MESSAGES = True  # Set to False to temporarily disable sending Telegram messages
+SEND_TELEGRAM_MESSAGES = False  # Set to False to temporarily disable sending Telegram messages
 
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:
@@ -130,6 +130,7 @@ def handle_event(tx):
     to_name = ADDRESS_MAP.get(to_address, to_address)
 
     if from_address in ADDRESSES_TO_MONITOR:
+        time.sleep(15)
         action_text = get_transaction_action(tx_hash)
         message = (
             f'⭐ *{from_name}: OUTGOING* 💵\n\n'
@@ -139,6 +140,7 @@ def handle_event(tx):
         send_telegram_message(message)
 
     if to_address in ADDRESSES_TO_MONITOR:
+        time.sleep(15)
         message = (
             f'⭐ *{to_name}: INCOMING* 💵\n'
             f'*Value:* {value} ETH\n'

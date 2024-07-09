@@ -19,7 +19,7 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 ADDRESSES_TO_MONITOR = os.getenv('ADDRESSES_TO_MONITOR')
 ADDRESS_NAMES = os.getenv('ADDRESS_NAMES')
-SEND_TELEGRAM_MESSAGES = False  # Set to False to temporarily disable sending Telegram messages
+SEND_TELEGRAM_MESSAGES = True  # Set to False to temporarily disable sending Telegram messages
 
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:
@@ -84,6 +84,13 @@ def extract_token_link(action_line):
             token_text = action_line[start_idx:end_idx].strip()
     return token_link, token_text
 
+def escape_markdown(text):
+    """
+    Escapes Markdown special characters in the given text.
+    """
+    escape_chars = r'\_*~`>#+-=|{}.!'
+    return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
+
 def get_transaction_action(tx_hash):
     """
     Fetches the transaction action from Etherscan and returns a cleaned version of it.
@@ -110,6 +117,9 @@ def get_transaction_action(tx_hash):
                 if token_link and token_text:
                     cleaned_action = cleaned_action.replace(token_text, f"[{token_text}]({token_link})")
                 
+                # Escape markdown special characters
+                cleaned_action = escape_markdown(cleaned_action)
+                
                 return cleaned_action
         
         logging.info("Could not find 'Transaction Action:' section in the HTML.")
@@ -130,17 +140,17 @@ def handle_event(tx):
     to_name = ADDRESS_MAP.get(to_address, to_address)
 
     if from_address in ADDRESSES_TO_MONITOR:
-        time.sleep(15)
+        time.sleep(5)
         action_text = get_transaction_action(tx_hash)
         message = (
-            f'⭐ *{from_name}: OUTGOING* 💵\n\n'
-            f'*Transaction Hash:* {tx_hash}\n\n'
-            f'*Action:* {action_text}'
+            f'⭐ *{from_name}:* 💵\n\n'
+            f'*Transaction Hash:*\n{tx_hash}\n\n'
+            f'*Action:*\n{action_text}'
         )
         send_telegram_message(message)
 
     if to_address in ADDRESSES_TO_MONITOR:
-        time.sleep(15)  # Wait for 15 seconds
+        time.sleep(5)
         message = (
             f'⭐ *{to_name}: INCOMING* 💵\n'
             f'*Value:* {value} ETH\n'

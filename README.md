@@ -4,6 +4,8 @@ The Moneytree Tracking Bot is a Python-based tool that monitors Ethereum blockch
 
 ![MTP](images/MTB.png)
 
+❗Currently only supporting Ethereum Mainnet ❗
+
 ## Features
 
 - Monitors Ethereum transactions for specified addresses.

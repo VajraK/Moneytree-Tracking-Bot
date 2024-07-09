@@ -19,7 +19,7 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 ADDRESSES_TO_MONITOR = os.getenv('ADDRESSES_TO_MONITOR')
 ADDRESS_NAMES = os.getenv('ADDRESS_NAMES')
-SEND_TELEGRAM_MESSAGES = False  # Set to False to temporarily disable sending Telegram messages
+SEND_TELEGRAM_MESSAGES = True  # Set to False to temporarily disable sending Telegram messages
 
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:

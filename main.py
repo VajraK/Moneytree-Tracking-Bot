@@ -162,11 +162,10 @@ def handle_event(tx):
     if to_address in ADDRESSES_TO_MONITOR:
         time.sleep(5)
         message = (
-            f'⭐ *{to_name}: INCOMING* 💵\n'
-            f'*Value:* {value} ETH\n'
-            f'*From:* {from_address}\n'
-            f'*To:* {to_address}\n'
-            f'*Transaction Hash:* {tx_hash}\n'
+            f'⭐ *{to_name}: INCOMING* 💵\n\n'
+            f'*From:*\n{from_address}\n\n'
+            f'*To:*\n{to_address}\n\n'
+            f'*Transaction Hash:*\n{tx_hash}'
         )
         send_telegram_message(message)
 

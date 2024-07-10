@@ -45,7 +45,7 @@ The Moneytree Tracking Bot is a Python-based tool that monitors Ethereum blockch
    python get_chat_id.py
    ```
 
-   This script will print the chat ID of the group or individual chat where the bot received the most recent message. Use this chat ID in your `.env` file.
+   This script will print the chat ID of the group or individual chat where the bot was most recently mentioned (i.e., if the bot's name is 'good-bot', then you would mention him by typing @good-bot). Use this chat ID in your `.env` file.
 
 4. **Create a `.env` file:**
 

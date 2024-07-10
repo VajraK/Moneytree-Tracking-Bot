@@ -6,6 +6,7 @@ import logging
 from web3 import Web3
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from retry import retry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -91,6 +92,7 @@ def escape_markdown(text):
     escape_chars = r'\_*~`>#+-=|{}.!'
     return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
 
+@retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 def get_transaction_action(tx_hash):
     """
     Fetches the transaction action from Etherscan and returns a cleaned version of it.
@@ -125,7 +127,15 @@ def get_transaction_action(tx_hash):
         logging.info("Could not find 'Transaction Action:' section in the HTML.")
     else:
         logging.error(f"Failed to fetch the Etherscan page. Status code: {response.status_code}")
+        response.raise_for_status()  # Raise an HTTPError if the status code is 4xx, 5xx
     return "No ACTION info available"
+
+@retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
+def get_block_number():
+    """
+    Retrieves the latest block number from the Ethereum blockchain.
+    """
+    return web3.eth.block_number
 
 def handle_event(tx):
     """
@@ -164,11 +174,11 @@ def log_loop(poll_interval):
     """
     Main loop that polls for new blocks and handles transactions in those blocks.
     """
-    latest_block = web3.eth.block_number
+    latest_block = get_block_number()
     logging.info(f"Starting to monitor from block {latest_block}")
     while True:
         logging.info("Checking for new events...")
-        current_block = web3.eth.block_number
+        current_block = get_block_number()
         if current_block > latest_block:
             for block_num in range(latest_block + 1, current_block + 1):
                 block = web3.eth.get_block(block_num, full_transactions=True)

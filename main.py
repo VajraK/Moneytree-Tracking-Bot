@@ -68,6 +68,8 @@ def clean_html(raw_html):
     """
     clean_text = re.sub('<.*?>', ' ', raw_html)
     clean_text = re.sub('\s+', ' ', clean_text).strip()
+    clean_text = clean_text.replace('(', '〈').replace(')', '〉')
+    print(f"Extracted token text: {clean_text}")
     return clean_text
 
 def extract_token_link(action_line):

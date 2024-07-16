@@ -20,7 +20,8 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 ADDRESSES_TO_MONITOR = os.getenv('ADDRESSES_TO_MONITOR')
 ADDRESS_NAMES = os.getenv('ADDRESS_NAMES')
-SEND_TELEGRAM_MESSAGES = True  # Set to False to temporarily disable sending Telegram messages
+SEND_TELEGRAM_MESSAGES = True  # Set to False to disable sending Telegram messages
+ALLOW_SWAP_MESSAGES_ONLY = True # Set to True to allow swap messages only
 
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:
@@ -154,6 +155,10 @@ def handle_event(tx):
     if from_address in ADDRESSES_TO_MONITOR:
         time.sleep(5)
         action_text = get_transaction_action(tx_hash)
+        
+        if ALLOW_SWAP_MESSAGES_ONLY and not action_text.startswith("Swap"):
+            return  # Skip non-swap transactions
+        
         message = (
             f'⭐ *{from_name}:* 💵\n\n'
             f'*Transaction Hash:*\n{tx_hash}\n\n'
@@ -163,6 +168,8 @@ def handle_event(tx):
 
     if to_address in ADDRESSES_TO_MONITOR:
         time.sleep(5)
+        if ALLOW_SWAP_MESSAGES_ONLY:
+            return  # Skip incoming messages if only swaps are allowed
         message = (
             f'⭐ *{to_name}: INCOMING* 💵\n\n'
             f'*From:*\n{from_address}\n\n'

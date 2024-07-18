@@ -20,8 +20,11 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 CHAT_ID = os.getenv('CHAT_ID')
 ADDRESSES_TO_MONITOR = os.getenv('ADDRESSES_TO_MONITOR')
 ADDRESS_NAMES = os.getenv('ADDRESS_NAMES')
-SEND_TELEGRAM_MESSAGES = True  # Set to False to disable sending Telegram messages
-ALLOW_SWAP_MESSAGES_ONLY = True # Set to True to allow swap messages only
+TRADING_BOT_URL = 'http://localhost:5000/transaction'
+
+SEND_TELEGRAM_MESSAGES = True  # Set to True to enable sending Telegram messages
+ALLOW_SWAP_MESSAGES_ONLY = True # Set to True to enable swap messages only
+ALLOW_MONEYTREE_TRADING_BOT_INTERACTION = True # Set to True to enable interactions with the Moneytree Trading Bot
 
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:
@@ -158,7 +161,15 @@ def handle_event(tx):
         
         if ALLOW_SWAP_MESSAGES_ONLY and not action_text.startswith("Swap"):
             return  # Skip non-swap transactions
-        
+
+        transaction_details = {
+            'from_name': from_name,
+            'tx_hash': tx_hash,
+            'action_text': action_text,
+        }
+        if ALLOW_MONEYTREE_TRADING_BOT_INTERACTION:
+            notify_trading_bot(transaction_details)
+
         message = (
             f'⭐ *{from_name}:* 💵\n\n'
             f'*Transaction Hash:*\n{tx_hash}\n\n'
@@ -177,6 +188,17 @@ def handle_event(tx):
             f'*Transaction Hash:*\n{tx_hash}'
         )
         send_telegram_message(message)
+
+def notify_trading_bot(transaction_details):
+    """
+    Sends the transaction details to the trading bot via HTTP POST request.
+    """
+    try:
+        response = requests.post(TRADING_BOT_URL, json=transaction_details)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
+        logging.info(f"Trading bot response: {response.status_code} - {response.text}")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error sending transaction details to trading bot: {e}")
 
 def log_loop(poll_interval):
     """

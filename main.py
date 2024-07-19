@@ -28,6 +28,13 @@ ALLOW_SWAP_MESSAGES_ONLY = True # Set to True to enable swap messages only
 ALLOW_AGGREGATED_MESSAGES_ALSO = True # Set to True to enable aggregated messages also
 ALLOW_MONEYTREE_TRADING_BOT_INTERACTION = True # Set to True to enable interactions with the Moneytree Trading Bot
 
+# Bypassing proxies in local environment
+proxies = {
+    "http": None,
+    "https": None,
+}
+
+
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:
     logging.error("ADDRESSES_TO_MONITOR or ADDRESS_NAMES environment variable is not set")
@@ -220,7 +227,7 @@ def notify_trading_bot(transaction_details):
     Sends the transaction details to the trading bot via HTTP POST request.
     """
     try:
-        response = requests.post(TRADING_BOT_URL, json=transaction_details)
+        response = requests.post(TRADING_BOT_URL, json=transaction_details, proxies=proxies)
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx and 5xx)
         logging.info(f"Trading bot response: {response.status_code} - {response.text}")
     except requests.exceptions.RequestException as e:

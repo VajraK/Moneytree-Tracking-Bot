@@ -25,6 +25,7 @@ TRADING_BOT_URL = 'http://localhost:5000/transaction'
 
 SEND_TELEGRAM_MESSAGES = True  # Set to True to enable sending Telegram messages
 ALLOW_SWAP_MESSAGES_ONLY = True # Set to True to enable swap messages only
+ALLOW_AGGREGATED_MESSAGES_ALSO = True # Set to True to enable aggregated messages also
 ALLOW_MONEYTREE_TRADING_BOT_INTERACTION = True # Set to True to enable interactions with the Moneytree Trading Bot
 
 # Ensure required environment variables are set
@@ -75,6 +76,11 @@ def clean_html(raw_html):
     clean_text = re.sub('\s+', ' ', clean_text).strip()
     clean_text = clean_text.replace('(', '〈').replace(')', '〉')
     
+    # Remove unwanted strings
+    unwanted_strings = ['Click to show more', 'Click to show less']
+    for unwanted in unwanted_strings:
+        clean_text = clean_text.replace(unwanted, '')
+
     print(f"Extracted token text: {clean_text}")
     return clean_text
 
@@ -126,10 +132,18 @@ def get_transaction_action(tx_hash):
                 clean_line = clean_html(line.strip().replace('Transaction Action: ', '').strip())
                 if clean_line:
                     action_line = line.strip().replace('Transaction Action: ', '').strip()
-                else:
-                    # Use the following line if no other non-HTML text is present
+                elif clean_html(lines[i + 1].strip()):
+                    # Use the following line if it contains non-HTML text
                     action_line = lines[i + 1].strip()
+                else:
+                    # Look for the next occurrence of 'Sponsored:'
+                    sponsored_index = next((j for j in range(i, len(lines)) if 'Sponsored:' in lines[j]), None)
+                    if sponsored_index:
+                        action_line = '\n'.join(lines[i+1:sponsored_index]).strip()
+                    else:
+                        action_line = "No ACTION info available"
                 
+                # Clean the action line
                 cleaned_action = clean_html(action_line)
                 
                 # Extract token link and text
@@ -171,8 +185,8 @@ def handle_event(tx):
         time.sleep(5)
         action_text = get_transaction_action(tx_hash)
         
-        if ALLOW_SWAP_MESSAGES_ONLY and not action_text.startswith("Swap"):
-            return  # Skip non-swap transactions
+        if ALLOW_SWAP_MESSAGES_ONLY and not (action_text.startswith("Swap") or (ALLOW_AGGREGATED_MESSAGES_ALSO and action_text.startswith("Aggregated"))):
+            return  # Skip non-swap and non-aggregated transactions if only swaps are allowed
 
         transaction_details = {
             'from_name': from_name,

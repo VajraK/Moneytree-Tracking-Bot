@@ -73,6 +73,11 @@ def clean_html(raw_html):
     clean_text = re.sub('<.*?>', ' ', raw_html)
     clean_text = re.sub('\s+', ' ', clean_text).strip()
     clean_text = clean_text.replace('(', '〈').replace(')', '〉')
+    
+    # Adjust the position of the value in parentheses for ETH swaps
+    clean_text = re.sub(r'Swap (\d+\.?\d*) 〈(\$\d+\.\d+)〉 ETH', r'Swap \1 ETH 〈\2〉', clean_text)
+    clean_text = re.sub(r'For (\d+\.?\d*) 〈(\$\d+\.\d+)〉 ETH', r'For \1 ETH 〈\2〉', clean_text)
+    
     print(f"Extracted token text: {clean_text}")
     return clean_text
 
@@ -112,6 +117,8 @@ def get_transaction_action(tx_hash):
     if response.status_code == 200:
         logging.info("Successfully fetched the Etherscan page.")
         soup = BeautifulSoup(response.text, 'html.parser')
+        with open("etherscan_page.html", "w", encoding="utf-8") as file:
+            file.write(response.text)
         
         # Read the HTML content and search for 'Transaction Action:'
         for line in response.text.split('\n'):

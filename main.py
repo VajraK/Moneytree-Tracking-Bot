@@ -120,11 +120,19 @@ def get_transaction_action(tx_hash):
         with open("etherscan_page.html", "w", encoding="utf-8") as file:
             file.write(response.text)
         
-        # Read the HTML content and search for 'Transaction Action:'
-        for line in response.text.split('\n'):
-            if 'Transaction Action:' in line:
-                logging.info(f"Found 'Transaction Action:' line: {line.strip()}")
-                action_line = line.strip().replace('Transaction Action:', '').strip()
+        lines = response.text.split('\n')
+        for i, line in enumerate(lines):
+            if 'Transaction Action: ' in line:
+                logging.info(f"Found 'Transaction Action: ' line: {line.strip()}")
+                
+                # Check if the line contains other non-HTML text
+                clean_line = clean_html(line.strip().replace('Transaction Action: ', '').strip())
+                if clean_line:
+                    action_line = line.strip().replace('Transaction Action: ', '').strip()
+                else:
+                    # Use the following line if no other non-HTML text is present
+                    action_line = lines[i + 1].strip()
+                
                 cleaned_action = clean_html(action_line)
                 
                 # Extract token link and text

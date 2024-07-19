@@ -1,6 +1,6 @@
 # Moneytree Tracking Bot
 
-The Moneytree Tracking Bot is a Python-based tool that monitors Ethereum blockchain transactions for specific addresses. It sends transaction details to a designated Telegram chat. The bot can detect and report on transactions involving monitored addresses, including transaction actions such as token swaps.
+The Moneytree Tracking Bot (MTB) is a Python-based tool that monitors Ethereum blockchain transactions for specific addresses. It sends transaction details to a designated Telegram chat. The bot can detect and report on transactions involving monitored addresses, including transaction actions such as token swaps.
 
 ![MTP](images/MTB.png)
 

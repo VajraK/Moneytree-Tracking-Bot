@@ -7,6 +7,7 @@ from web3 import Web3
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from retry import retry
+import threading
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -73,10 +74,6 @@ def clean_html(raw_html):
     clean_text = re.sub('<.*?>', ' ', raw_html)
     clean_text = re.sub('\s+', ' ', clean_text).strip()
     clean_text = clean_text.replace('(', '〈').replace(')', '〉')
-    
-    # Adjust the position of the value in parentheses for ETH swaps
-    clean_text = re.sub(r'Swap (\d+\.?\d*) 〈(\$\d+\.\d+)〉 ETH', r'Swap \1 ETH 〈\2〉', clean_text)
-    clean_text = re.sub(r'For (\d+\.?\d*) 〈(\$\d+\.\d+)〉 ETH', r'For \1 ETH 〈\2〉', clean_text)
     
     print(f"Extracted token text: {clean_text}")
     return clean_text
@@ -183,7 +180,7 @@ def handle_event(tx):
             'action_text': action_text,
         }
         if ALLOW_MONEYTREE_TRADING_BOT_INTERACTION:
-            notify_trading_bot(transaction_details)
+            threading.Thread(target=notify_trading_bot, args=(transaction_details,)).start()
 
         message = (
             f'⭐ *{from_name}:* 💵\n\n'

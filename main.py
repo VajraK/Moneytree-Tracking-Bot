@@ -209,9 +209,9 @@ def handle_event(tx):
 
         token_action = ''
         if 'ETH For' in action_text:
-            token_action += '⭐ *Token BUY* 💵\n\n'
+            token_action += '⭐ *Token BUY* ⭐\n\n'
         if 'ETH On' in action_text:
-            token_action += '⭐ *Token SELL* 💵\n\n'
+            token_action += '💵 *Token SELL* 💵\n\n'
 
         message = (
             f'{token_action}'

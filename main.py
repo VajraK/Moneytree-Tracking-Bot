@@ -34,7 +34,6 @@ proxies = {
     "https": None,
 }
 
-
 # Ensure required environment variables are set
 if ADDRESSES_TO_MONITOR is None or ADDRESS_NAMES is None:
     logging.error("ADDRESSES_TO_MONITOR or ADDRESS_NAMES environment variable is not set")
@@ -69,7 +68,8 @@ def send_telegram_message(message):
     data = {
         'chat_id': CHAT_ID,
         'text': message,
-        'parse_mode': 'MarkdownV2'
+        'parse_mode': 'MarkdownV2',
+        'disable_web_page_preview': True
     }
     response = requests.post(url, data=data)
     logging.info(f"Telegram response: {response.json()}")
@@ -188,6 +188,10 @@ def handle_event(tx):
     from_name = ADDRESS_MAP.get(from_address, from_address)
     to_name = ADDRESS_MAP.get(to_address, to_address)
 
+    from_name_link = f"[{from_name}](https://etherscan.io/address/{from_address})"
+    to_name_link = f"[{to_name}](https://etherscan.io/address/{to_address})"
+    tx_hash_link = f"[{tx_hash}](https://etherscan.io/tx/{tx_hash})"
+
     if from_address in ADDRESSES_TO_MONITOR:
         time.sleep(5)
         action_text = get_transaction_action(tx_hash)
@@ -203,9 +207,16 @@ def handle_event(tx):
         if ALLOW_MONEYTREE_TRADING_BOT_INTERACTION:
             threading.Thread(target=notify_trading_bot, args=(transaction_details,)).start()
 
+        token_action = ''
+        if 'ETH For' in action_text:
+            token_action += '⭐ *Token BUY* 💵\n\n'
+        if 'ETH On' in action_text:
+            token_action += '⭐ *Token SELL* 💵\n\n'
+
         message = (
-            f'⭐ *{from_name}:* 💵\n\n'
-            f'*Transaction Hash:*\n{tx_hash}\n\n'
+            f'{token_action}'
+            f'*Wallet:*\n{from_name_link}\n\n'
+            f'*Transaction Hash:*\n{tx_hash_link}\n\n'
             f'*Action:*\n{action_text}'
         )
         send_telegram_message(message)
@@ -215,10 +226,10 @@ def handle_event(tx):
         if ALLOW_SWAP_MESSAGES_ONLY:
             return  # Skip incoming messages if only swaps are allowed
         message = (
-            f'⭐ *{to_name}: INCOMING* 💵\n\n'
+            f'⭐ *{to_name_link}: INCOMING* 💵\n\n'
             f'*From:*\n{from_address}\n\n'
             f'*To:*\n{to_address}\n\n'
-            f'*Transaction Hash:*\n{tx_hash}'
+            f'*Transaction Hash:*\n{tx_hash_link}'
         )
         send_telegram_message(message)
 

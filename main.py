@@ -121,13 +121,11 @@ def escape_markdown(text):
 
 def insert_zero_width_space(text):
     """
-    Inserts a zero-width space between the first and second digits of any sequence
-    of exactly nine digits.
+    Inserts a zero-width space after the fifth digit in a sequence of exactly nine digits following a dot.
     """
     zero_width_space = '\u200B'
-    return re.sub(r'(\d{1})(\d{8})(?=\D|$)', r'\1' + zero_width_space + r'\2', text)
+    return re.sub(r'(\.\d{5})(\d{4})(?=\D|$)', r'\1' + zero_width_space + r'\2', text)
 
-@retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 @retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 def get_transaction_action(tx_hash):
     """
@@ -171,11 +169,12 @@ def get_transaction_action(tx_hash):
                 if token_link and token_text:
                     cleaned_action = cleaned_action.replace(token_text, f"[{token_text}]({token_link})")
                 
-                # Insert zero-width space between the first and second digits of any sequence of exactly nine digits
+                # Insert zero-width space after the fifth digit following a dot in sequences of exactly nine digits
                 cleaned_action = insert_zero_width_space(cleaned_action)
 
                 # Escape markdown special characters
                 cleaned_action = escape_markdown(cleaned_action)
+                print(cleaned_action)
                 
                 return cleaned_action
         

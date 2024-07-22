@@ -104,7 +104,13 @@ def extract_token_link(action_line):
             start_idx = action_line.find('>', match.end()) + 1
             end_idx = action_line.find('</a>', start_idx)
             token_text = action_line[start_idx:end_idx].strip()
-    return token_link, token_text
+            
+            if token_text == 'ETH':
+                token_text = 'ETH〈token〉'
+                action_line = action_line[:start_idx] + token_text + action_line[end_idx:]
+
+    return token_link, token_text, action_line
+
 
 def escape_markdown(text):
     """
@@ -113,6 +119,15 @@ def escape_markdown(text):
     escape_chars = r'\_*~`>#+-=|{}.!'
     return re.sub(f'([{re.escape(escape_chars)}])', r'\\\1', text)
 
+def insert_zero_width_space(text):
+    """
+    Inserts a zero-width space between the first and second digits of any sequence
+    of exactly nine digits.
+    """
+    zero_width_space = '\u200B'
+    return re.sub(r'(\d{1})(\d{8})(?=\D|$)', r'\1' + zero_width_space + r'\2', text)
+
+@retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 @retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 def get_transaction_action(tx_hash):
     """
@@ -150,14 +165,15 @@ def get_transaction_action(tx_hash):
                     else:
                         action_line = "No ACTION info available"
                 
-                # Clean the action line
+                # Extract token link and text and clean the action line
+                token_link, token_text, action_line = extract_token_link(action_line)
                 cleaned_action = clean_html(action_line)
-                
-                # Extract token link and text
-                token_link, token_text = extract_token_link(action_line)
                 if token_link and token_text:
                     cleaned_action = cleaned_action.replace(token_text, f"[{token_text}]({token_link})")
                 
+                # Insert zero-width space between the first and second digits of any sequence of exactly nine digits
+                cleaned_action = insert_zero_width_space(cleaned_action)
+
                 # Escape markdown special characters
                 cleaned_action = escape_markdown(cleaned_action)
                 
@@ -168,6 +184,7 @@ def get_transaction_action(tx_hash):
         logging.error(f"Failed to fetch the Etherscan page. Status code: {response.status_code}")
         response.raise_for_status()  # Raise an HTTPError if the status code is 4xx, 5xx
     return "No ACTION info available"
+
 
 @retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 def get_block_number():

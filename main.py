@@ -11,6 +11,10 @@ import threading
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger()
+file_handler = logging.FileHandler('mtb_logs.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logger.addHandler(file_handler)
 
 # Load environment variables from .env file
 load_dotenv()

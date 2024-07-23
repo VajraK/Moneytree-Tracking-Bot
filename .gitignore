@@ -1,3 +1,4 @@
 .env
 venv/
 etherscan_page.html
+mtb_logs.log

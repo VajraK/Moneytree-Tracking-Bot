@@ -125,10 +125,20 @@ def escape_markdown(text):
 
 def insert_zero_width_space(text):
     """
-    Inserts a zero-width space after the fifth digit in a sequence of exactly nine digits following a dot.
+    Inserts a zero-width space after the fifth digit in a sequence of exactly nine digits 
+    following a dot or nine digits preceding a dot.
     """
     zero_width_space = '\u200B'
-    return re.sub(r'(\.\d{5})(\d{4})(?=\D|$)', r'\1' + zero_width_space + r'\2', text)
+    
+    # Pattern for nine digits following a dot
+    pattern_following_dot = r'(\.\d{5})(\d{4})(?=\D|$)'
+    text = re.sub(pattern_following_dot, r'\1' + zero_width_space + r'\2', text)
+    
+    # Pattern for nine digits preceding a dot
+    pattern_preceding_dot = r'(\d{5})(\d{4}\.)(?=\D|$)'
+    text = re.sub(pattern_preceding_dot, r'\1' + zero_width_space + r'\2', text)
+    
+    return text
 
 @retry(tries=5, delay=2, backoff=2, jitter=(1, 3))
 def get_transaction_action(tx_hash):

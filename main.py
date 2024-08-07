@@ -245,9 +245,9 @@ def handle_event(tx):
             threading.Thread(target=notify_trading_bot, args=(transaction_details,)).start()
 
         token_action = ''
-        if 'ETH For' in action_text:
+        if 'ETH For' in action_text or re.search(r'ETH \〈[^\)]+\〉 for', action_text):
             token_action += '⭐ *Token BUY* ⭐\n\n'
-        if 'ETH On' in action_text:
+        if 'ETH On' in action_text or re.search(r'ETH \〈[^\)]+\〉 On', action_text):
             token_action += '💵 *Token SELL* 💵\n\n'
 
         message = (
